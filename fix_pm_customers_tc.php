@@ -61,7 +61,7 @@ class TuCuotaService {
     }
 }
 
-$tucuotaService = new TuCuotaService($api_secret_sandbox); // false for production
+$tucuotaService = new TuCuotaService($api_secret_sandbox, true); // second in false for production
 $customers = ['CSeWwOBBVaZj', 'CS46Dyxx1kwE', 'CSdYDqpWBwkq', 'CSJLDQ12YDrj'];
 
 foreach ($customers as $customer) {
