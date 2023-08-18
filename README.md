@@ -3,7 +3,7 @@
 This is a set of tooling to interact with TuCuota, to add, edit or remove data using the API
 
 Clone the repository 
-```git clone https://github.com/tucuota/tucuota-tooling-php.git````
+```git clone https://github.com/tucuota/tucuota-tooling-php.git```
 
 Install libraries
 ```composer install```
