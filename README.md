@@ -8,5 +8,8 @@ Clone the repository
 Add Guzzle
 ```composer require guzzlehttp/guzzle```
 
+
 Run scripts for example
 ``php payment_batch_cancel.php``
+
+Create an config.php copying the example, and add your secret key
