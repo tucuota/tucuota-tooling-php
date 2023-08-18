@@ -5,8 +5,8 @@ This is a set of tooling to interact with the TuCuota, to add, edit or remove in
 Clone the repository 
 ```git clone https://github.com/tucuota/tucuota-tooling-php.git````
 
-Add Guzzle
-```composer require guzzlehttp/guzzle```
+Install libraries
+```composer install```
 
 
 Run scripts for example
