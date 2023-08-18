@@ -59,10 +59,28 @@ class TuCuotaService {
             return null;
         }
     }
+
+    public function getAllCustomers() {
+        try {
+            $response = $this->client->get('customers');
+            $data = json_decode($response->getBody()->getContents(), true);
+            $customersArray = [];
+            
+            foreach ($data['data'] as $customer) {
+                $customersArray[] = $customer['id'];
+            }
+            
+            return $customersArray;
+        } catch (Exception $ex) {
+            echo "Error fetching all customers: {$ex->getMessage()}\n";
+            return [];
+        }
+    }
 }
 
-$tucuotaService = new TuCuotaService($api_secret_sandbox, true); // second in false for production
-$customers = ['CSeWwOBBVaZj', 'CS46Dyxx1kwE', 'CSdYDqpWBwkq', 'CSJLDQ12YDrj'];
+$tucuotaService = new TuCuotaService($api_secret, false); // second in false for production
+//$customers = ['CSkywYe9jVwR'];
+$customers = $tucuotaService->getAllCustomers();
 
 foreach ($customers as $customer) {
     $paymentMethod = $tucuotaService->getPaymentMethod($customer);
