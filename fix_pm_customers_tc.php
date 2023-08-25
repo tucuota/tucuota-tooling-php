@@ -31,82 +31,37 @@ class TuCuotaService {
         }
     }
 
-    public function getCustomerMetadata($customerId) {
-        try {
-            $response = $this->client->get('customers/' . $customerId);
+    public function addPmsToAllUsers() {
+    
+        
+        $endpoint = "https://api.tucuota.com/v1/customers?limit=100";
+        
+        while ($endpoint) {
+            echo "fetching " .$endpoint . PHP_EOL;
+            $response = $this->client->get($endpoint);
             $data = json_decode($response->getBody()->getContents(), true);
-            return $data['data']['metadata'] ?? null;
-        } catch (Exception $ex) {
-            echo "Error fetching customer metadata: {$ex->getMessage()}\n";
-            return null;
-        }
-    }
-
-    public function updateCustomerMetadata($customerId, $metadata) {
-        try {
-            $dataToSend = [
-                'metadata' => $metadata
-            ];
-            
-            $response = $this->client->put('customers/' . $customerId, [
-                'json' => $dataToSend
-            ]);
-            $data = json_decode($response->getBody()->getContents(), true);
-            echo 'Se completo la metadata ' . json_encode($metadata) . ' en el customer ' . $customerId . PHP_EOL;
-            return $data ?? null;
-        } catch (Exception $ex) {
-            echo "Error fetching customer update: {$ex->getMessage()}\n";
-            return null;
-        }
-    }
-
-    public function getAllCustomers() {
-        try {
-            $response = $this->client->get('customers');
-            $data = json_decode($response->getBody()->getContents(), true);
-            $customersArray = [];
             
             foreach ($data['data'] as $customer) {
-                $customersArray[] = $customer['id'];
+                $metadata = $customer['metadata'] ?: [];
+                if (!key_exists('payment_method_id', $metadata)) {
+                    $id = $customer['id'];
+                    $paymentMethod = $this->getPaymentMethod($id);
+                    if (!$paymentMethod) {
+                        echo "No paymentMethod for customer $id" . PHP_EOL;
+                        continue;
+                    }
+                    $metadata['payment_method_id'] = $paymentMethod;
+                    $response = $this->client->put('customers/' . $id, [
+                        'json' => ['metadata' => $metadata]
+                    ]);
+                    echo "Added $paymentMethod to customer $id" . PHP_EOL;
+                }
             }
-            
-            return $customersArray;
-        } catch (Exception $ex) {
-            echo "Error fetching all customers: {$ex->getMessage()}\n";
-            return [];
-        }
+            $endpoint = $data['links']['next'];
+
+        }   
     }
 }
 
 $tucuotaService = new TuCuotaService($api_secret, false); // second in false for production
-//$customers = ['CSkywYe9jVwR'];
-$customers = $tucuotaService->getAllCustomers();
-
-foreach ($customers as $customer) {
-    $paymentMethod = $tucuotaService->getPaymentMethod($customer);
-    $metadata = $tucuotaService->getCustomerMetadata($customer);
-    //$metadata = '{"clave":"valor"}';
-    
-    if ($paymentMethod) {
-        $exists = (is_string($metadata) && strpos($metadata, $paymentMethod) !== false) || (is_array($metadata) && in_array($paymentMethod, $metadata));
-        if($exists){
-            echo 'Ya existe el PM ' . $paymentMethod . ' en la metadata del customer ' . $customer . PHP_EOL;
-        }else{
-            if ($metadata && is_array($metadata)) {
-                $metadata['payment_method_id'] = $paymentMethod;
-            } elseif (!$metadata) {
-                $metadata = ['payment_method_id' => $paymentMethod];
-            }            
-            $tucuotaService->updateCustomerMetadata($customer, $metadata);
-        }
-    }else{
-        echo 'El customer ' . $customer . ' no tiene PM o Pagos ' . PHP_EOL;
-    }
-}
-
-// Ya existe el PM PM6eDbGwrkrJ en la metadata del customer CSeWwOBBVaZj
-// Se completo la metadata {"payment_method_id":"PM6eDbGwrkrJ"} en el customer CSeWwOBBVaZj
-// Se completo la metadata {"salesforce_id":"0036S00005ydRmMQAU","payment_method_id":"PM3xW1GOvDqj"} en el customer CS46Dyxx1kwE% 
-
-?>
-
+$customers = $tucuotaService->addPmsToAllUsers();
