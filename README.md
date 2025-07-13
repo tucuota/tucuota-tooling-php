@@ -12,3 +12,5 @@ Run scripts. For example
 - ``php payment_batch_cancel.php`` to cancel payments in batch
 
 Create a ```config.php``` file copying the example, and add inside the file your secret key.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/tucuota/tucuota-tooling-php)
